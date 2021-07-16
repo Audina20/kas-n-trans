@@ -46,7 +46,7 @@ if (isset($_POST['btnChangePassword'])) {
 				<div class="container-fluid">
 					<div class="row m-4">
 						<div class="col-lg-2">
-							<img src="https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg" class="img-fluid" />
+							<img src="<?= $dataUser['foto'] ? "assets/img/img_profiles/" . $dataUser['foto'] : "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg" ?>" class="img-fluid" />
 						</div>
 						<div class="col-lg">
 							<div class="card">
@@ -70,7 +70,7 @@ if (isset($_POST['btnChangePassword'])) {
 					<!-- Modal -->
 					<div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog" aria-labelledby="editProfileModalLabel" aria-hidden="true">
 						<div class="modal-dialog" role="document">
-							<form method="post" action="">
+							<form method="post" action="" enctype="multipart/form-data">
 								<input type="hidden" name="id_user" value="<?= $dataUser['id_user']; ?>">
 								<div class="modal-content">
 									<div class="modal-header">
@@ -96,7 +96,7 @@ if (isset($_POST['btnChangePassword'])) {
 										</div>
 										<div class="form-group">
 											<label for="foto">Foto <small>Max 5MB</small></label>
-											<input type="file" class="form-control" name="foto" id="foto">
+											<input type="file" class="form-control" name="foto" id="foto" accept="image/png, image/jpeg">
 										</div>
 									</div>
 									<div class="modal-footer">
@@ -163,17 +163,17 @@ if (isset($_POST['btnChangePassword'])) {
 
 if (isset($_POST['btnEditProfile'])) {
 
-	$id_user = htmlspecialchars($data['id_user']);
-	$nama_lengkap = htmlspecialchars(addslashes($data['nama_lengkap']));
-  	$username = htmlspecialchars($data['username']);
-  	$id_jabatan = htmlspecialchars($data['id_jabatan']);
+	$id_user = htmlspecialchars($_POST['id_user']);
+	$nama_lengkap = htmlspecialchars(addslashes($_POST['nama_lengkap']));
+	$username = htmlspecialchars($_POST['username']);
+	$id_jabatan = htmlspecialchars($_POST['id_jabatan']);
 
 	// Untuk foto
 	$foto = $_FILES['foto']['name'];
 	$file = $_FILES['foto']['tmp_name'];
 	$size = $_FILES['foto']['size'];
 	$tipe = $_FILES['foto']['type'];
-	$folder = "assets/img/img_profiles";
+	$folder = "assets/img/img_profiles/";
 	$saring = array('gif', 'png', 'jpg');
 	$ext = pathinfo($foto, PATHINFO_EXTENSION);
 
@@ -187,8 +187,7 @@ if (isset($_POST['btnEditProfile'])) {
 				$img = sha1($foto);
 				// Jika Mencoba upload & jika berhasil di upload
 				if (move_uploaded_file($file, $folder . $img)) {
-$query = mysqli_query($conn, "UPDATE user SET nama_lengkap = '$nama_lengkap', username = '$username', id_jabatan = '$id_jabatan' WHERE id_user = '$id_user', foto = '$img'");
-  	
+					$query = mysqli_query($conn, "UPDATE user SET nama_lengkap = '$nama_lengkap', username = '$username', id_jabatan = '$id_jabatan', foto = '$img' WHERE id_user = '$id_user'");
 ?>
 					<script type="text/javascript">
 						alert("Data berhasil disimpan!");
@@ -200,35 +199,33 @@ $query = mysqli_query($conn, "UPDATE user SET nama_lengkap = '$nama_lengkap', us
 					<script type="text/javascript">
 						alert("Error!");
 					</script>
-			<?php
+				<?php
 				}
+			} else {
+				// Jika gambar melebihi ukuran yang ditentukan.
+				?>
+				<script type="text/javascript">
+					alert("Ukuran gambar terlalu besar! (Max : 5MB)");
+				</script>
+			<?php
 			}
 		} else {
-			// Jika gambar melebihi ukuran yang ditentukan.
+			// Jika format gambar tidak sesuai dengan $saring
 			?>
 			<script type="text/javascript">
-				alert("Ukuran gambar terlalu besar! (Max : 5MB)");
+				alert("Format gambar tidak dizinkan!");
 			</script>
 		<?php
 		}
 	} else {
-		// Jika format gambar tidak sesuai dengan $saring
+
+		// Jika tidak upload foto, diganti dengan tanpa_foto.jpg
+		mysqli_query($conn, "UPDATE user SET nama_lengkap = '$nama_lengkap', username = '$username', id_jabatan = '$id_jabatan' WHERE id_user = '$id_user'");
+
 		?>
 		<script type="text/javascript">
-			alert("Format gambar tidak dizinkan!");
 		</script>
-	<?php
-	}
-} else {
-
-	// Jika tidak upload foto, diganti dengan tanpa_foto.jpg
-	mysqli_query($conn, "UPDATE user SET nama_lengkap = '$nama_lengkap', username = '$username', id_jabatan = '$id_jabatan' WHERE id_user = '$id_user'");
-  	
-	?>
-	<script type="text/javascript">
-		alert("Data berhasil disimpan!");
-		window.location.href = "index.php";
-	</script>
 <?php
+	}
 }
 ?>
