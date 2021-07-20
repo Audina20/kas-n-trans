@@ -191,6 +191,7 @@ if (isset($_POST['btnEditProfile'])) {
 ?>
 					<script type="text/javascript">
 						alert("Data berhasil disimpan!");
+						window.location.href = "profile.php"
 					</script>
 				<?php
 				} else {
@@ -224,6 +225,8 @@ if (isset($_POST['btnEditProfile'])) {
 
 		?>
 		<script type="text/javascript">
+			alert("Data berhasil disimpan!");
+			window.location.href = "profile.php"
 		</script>
 <?php
 	}
